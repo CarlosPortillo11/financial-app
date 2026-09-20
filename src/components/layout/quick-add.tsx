@@ -15,7 +15,8 @@ export function QuickAdd({ categories }: { categories: Category[] }) {
       <Button
         size="lg"
         onClick={() => setOpen(true)}
-        className="fixed right-4 bottom-[calc(3.75rem+env(safe-area-inset-bottom))] z-40 size-14 rounded-full shadow-[0_8px_24px_-6px_var(--primary)] md:static md:size-auto md:rounded-lg md:shadow-none"
+        // ponytail: vive fuera del header (backdrop-filter crearía containing block) y en escritorio se fija en la zona del header.
+        className="fixed right-4 bottom-[calc(3.75rem+env(safe-area-inset-bottom))] z-40 size-14 rounded-full shadow-[0_8px_24px_-6px_var(--primary)] md:top-2 md:right-6 md:bottom-auto md:size-auto md:rounded-lg md:shadow-none"
         aria-label="Registrar gasto"
       >
         <PlusIcon data-icon="inline-start" className="size-6 md:size-4" />

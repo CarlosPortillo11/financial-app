@@ -30,13 +30,10 @@ export function AppShell({
           <Suspense>
             <MonthPicker />
           </Suspense>
-          <div className="flex items-center gap-1">
-            <div className="md:hidden">
-              <Suspense>
-                <IconLinks />
-              </Suspense>
-            </div>
-            <QuickAdd categories={categories} />
+          <div className="md:hidden">
+            <Suspense>
+              <IconLinks />
+            </Suspense>
           </div>
         </header>
         <main className="mx-auto w-full max-w-5xl flex-1 px-3 pt-4 pb-28 md:px-6 md:pt-6 md:pb-10">
@@ -44,6 +41,7 @@ export function AppShell({
         </main>
       </div>
 
+      <QuickAdd categories={categories} />
       <Suspense>
         <TabBar />
       </Suspense>

@@ -26,7 +26,7 @@ export function KpiCards({ totals }: { totals: Totals }) {
 
 export function BiweekCards({ biweeks }: { biweeks: BiweekSummary[] }) {
   return (
-    <div className="grid gap-3 sm:grid-cols-2">
+    <>
       {biweeks.map((q) => (
         <Card key={q.biweek} size="sm">
           <CardContent className="flex flex-col gap-3">
@@ -45,7 +45,7 @@ export function BiweekCards({ biweeks }: { biweeks: BiweekSummary[] }) {
           </CardContent>
         </Card>
       ))}
-    </div>
+    </>
   );
 }
 

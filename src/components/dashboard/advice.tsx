@@ -60,7 +60,7 @@ export function RuleTable({ byType }: { byType: MonthSummary["byType"] }) {
                   </span>
                 </TableCell>
                 <TableCell className="text-right">
-                  <Amount value={t.diff} signed className={cn(t.bad && "text-destructive")} />
+                  <Amount value={t.diff} signed tone={t.bad ? "bad" : "good"} />
                 </TableCell>
                 <TableCell className="pr-6">
                   <span

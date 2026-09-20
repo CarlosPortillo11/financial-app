@@ -15,11 +15,11 @@ export default async function DashboardPage({ searchParams }: PageProps<"/">) {
       <h1 className="sr-only">Resumen de {formatPeriod(period)}</h1>
       <HeroAvailable totals={s.totals} />
       <KpiCards totals={s.totals} />
-      <BiweekCards biweeks={s.byBiweek} />
-      <div className="grid gap-4 md:gap-6 lg:grid-cols-[1fr_minmax(0,22rem)]">
-        <CategoryTable rows={s.byCategory} />
+      <div className="grid gap-4 md:gap-6 lg:grid-cols-3">
+        <BiweekCards biweeks={s.byBiweek} />
         <RuleChart byType={s.byType} />
       </div>
+      <CategoryTable rows={s.byCategory} />
     </div>
   );
 }

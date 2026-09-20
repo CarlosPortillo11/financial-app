@@ -1,15 +1,21 @@
 import { money } from "@/lib/money";
 import { cn } from "@/lib/utils";
 
-type Props = { value: number; className?: string; signed?: boolean };
+type Props = {
+  value: number;
+  className?: string;
+  /** Antepone "+" a los positivos. */
+  signed?: boolean;
+  tone?: "good" | "bad";
+};
 
-export function Amount({ value, className, signed }: Props) {
+export function Amount({ value, className, signed, tone }: Props) {
   return (
     <span
       className={cn(
         "tnum",
-        signed && value < 0 && "text-destructive",
-        signed && value > 0 && "text-success",
+        tone === "bad" && "text-destructive",
+        tone === "good" && "text-success",
         className,
       )}
     >
