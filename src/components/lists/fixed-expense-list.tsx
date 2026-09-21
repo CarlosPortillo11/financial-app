@@ -22,12 +22,12 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import type { Category, FixedExpense } from "@/db/schema";
 import { feedback } from "@/lib/action-feedback";
 import { money } from "@/lib/money";
-import { biweekForDueDay, formatPeriod } from "@/lib/period";
+import { biweekForDueDay, formatPeriod, type PayDays } from "@/lib/period";
 import { cn } from "@/lib/utils";
 
-type Props = { rows: FixedExpense[]; categories: Category[]; period: string; highlightId?: number };
+type Props = { rows: FixedExpense[]; categories: Category[]; period: string; payDays: PayDays; highlightId?: number };
 
-export function FixedExpenseList({ rows, categories, period, highlightId }: Props) {
+export function FixedExpenseList({ rows, categories, period, payDays, highlightId }: Props) {
   const [editing, setEditing] = useState<FixedExpense | "new" | null>(null);
   const remove = useAction(deleteFixedExpense, feedback("Gasto fijo eliminado"));
   const status = useAction(setFixedStatus, { onError: feedback("").onError });
@@ -75,7 +75,7 @@ export function FixedExpenseList({ rows, categories, period, highlightId }: Prop
               <CardContent className="flex flex-col divide-y divide-border/60 px-0">
                 {items.map((r) => {
                   const cat = byId.get(r.categoryId);
-                  const misassigned = biweekForDueDay(r.dueDay) !== r.biweek;
+                  const misassigned = biweekForDueDay(r.dueDay, payDays) !== r.biweek;
                   return (
                     <div
                       key={r.id}

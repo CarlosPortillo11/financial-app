@@ -33,13 +33,19 @@ export function periodOf(date: string): string {
   return date.slice(0, 7);
 }
 
-/** Regla fija: día <= 15 es Q1, si no Q2. */
-export function biweekOf(date: string): Biweek {
-  return Number(date.slice(8, 10)) <= 15 ? 1 : 2;
+export type PayDays = { payDay1: number; payDay2: number };
+
+/** Quincena por nómina: Q1 va del primer día de pago al día anterior al segundo; Q2 el resto (cruza al mes siguiente). */
+export function biweekForDueDay(day: number, p: PayDays): Biweek {
+  return day >= p.payDay1 && day < p.payDay2 ? 1 : 2;
 }
 
-export function biweekForDueDay(dueDay: number): Biweek {
-  return dueDay <= 15 ? 1 : 2;
+export function biweekOf(date: string, p: PayDays): Biweek {
+  return biweekForDueDay(Number(date.slice(8, 10)), p);
+}
+
+export function biweekLabel(n: Biweek, p: PayDays): string {
+  return n === 1 ? `del ${p.payDay1} al ${p.payDay2 - 1}` : `del ${p.payDay2} al ${p.payDay1 - 1}`;
 }
 
 export function formatPeriod(period: string): string {

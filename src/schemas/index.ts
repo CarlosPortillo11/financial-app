@@ -23,6 +23,7 @@ const description = z.string().trim().max(120, "Máximo 120 caracteres");
 export const categoryTypeSchema = z.enum(["necesidad", "deseo", "ahorro_inversion"]);
 export const categoryScopeSchema = z.enum(["fijo", "variable", "ambos"]);
 export const biweekSchema = z.union([z.literal(1), z.literal(2)], { error: "Elige la quincena" });
+const dayField = z.number({ error: "Día entre 1 y 31" }).int().min(1, "Entre 1 y 31").max(31, "Entre 1 y 31");
 
 export const categorySchema = z.object({
   // Un emoji puede ser varios code points (ZWJ, tono de piel); se limita por longitud.
@@ -44,7 +45,7 @@ export const fixedExpenseSchema = z.object({
   amount: amountSchema,
   period: periodSchema,
   biweek: biweekSchema,
-  dueDay: z.number({ error: "Día entre 1 y 31" }).int().min(1, "Entre 1 y 31").max(31, "Entre 1 y 31"),
+  dueDay: dayField,
   status: z.enum(["pagado", "pendiente"]),
   active: z.boolean(),
 });
@@ -75,6 +76,12 @@ export const settingsSchema = z
     savingsPct: pctField,
     savingSplitPct: pctField,
     investSplitPct: pctField,
+    payDay1: dayField,
+    payDay2: dayField,
+  })
+  .refine((s) => s.payDay1 < s.payDay2, {
+    message: "El primer día de pago debe ser menor que el segundo",
+    path: ["payDay2"],
   })
   .refine((s) => s.needsPct + s.wantsPct + s.savingsPct === 100, {
     message: "Necesidades + Deseos + Ahorro deben sumar 100%",

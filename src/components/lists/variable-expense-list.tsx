@@ -15,11 +15,11 @@ import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from "@/components/u
 import type { Category, VariableExpense } from "@/db/schema";
 import { feedback } from "@/lib/action-feedback";
 import { money } from "@/lib/money";
-import { biweekOf, formatDate, formatPeriod } from "@/lib/period";
+import { biweekOf, formatDate, formatPeriod, type PayDays } from "@/lib/period";
 
-type Props = { rows: VariableExpense[]; categories: Category[]; period: string };
+type Props = { rows: VariableExpense[]; categories: Category[]; period: string; payDays: PayDays };
 
-export function VariableExpenseList({ rows, categories, period }: Props) {
+export function VariableExpenseList({ rows, categories, period, payDays }: Props) {
   const [editing, setEditing] = useState<VariableExpense | "new" | null>(null);
   const remove = useAction(deleteVariableExpense, feedback("Gasto eliminado"));
   const byId = new Map(categories.map((c) => [c.id, c]));
@@ -62,7 +62,7 @@ export function VariableExpenseList({ rows, categories, period }: Props) {
               <div key={g.date} className="flex flex-col">
                 <div className="flex items-center justify-between bg-muted/40 px-4 py-1.5 text-xs text-muted-foreground">
                   <span>
-                    {formatDate(g.date)} · Q{biweekOf(g.date)}
+                    {formatDate(g.date)} · Q{biweekOf(g.date, payDays)}
                   </span>
                   <Amount value={g.items.reduce((a, r) => a + r.amount, 0)} />
                 </div>

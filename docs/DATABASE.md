@@ -60,7 +60,7 @@ datos, en `pendiente`. Meses pasados nunca se rellenan.
 | `category_id` | integer | FK → categories, restrict | |
 | `description` | varchar(120) | not null, default `''` | Opcional en la captura rápida |
 | `amount` | numeric(12,2) | not null, `> 0` | |
-| `date` | date | not null, **index** | Mes y quincena se derivan (día ≤ 15 → Q1) |
+| `date` | date | not null, **index** | Mes y quincena se derivan (día en [`pay_day_1`, `pay_day_2`) → Q1, resto Q2) |
 | `created_at` | timestamptz | not null, default now() | |
 
 ## `incomes`
@@ -86,6 +86,8 @@ Fila única (`id = 1`, CHECK). Porcentajes enteros.
 | `savings_pct` | smallint | 20 | `needs + wants + savings = 100` |
 | `saving_split_pct` | smallint | 10 | |
 | `invest_split_pct` | smallint | 10 | `saving_split + invest_split = savings_pct` |
+| `pay_day_1` | smallint | 14 | Día del primer pago; `1..31`, `< pay_day_2` |
+| `pay_day_2` | smallint | 28 | Día del segundo pago. Q1 = [`pay_day_1`, `pay_day_2`), Q2 = resto (cruza al mes siguiente) |
 
 ## Decisiones y posibles cambios futuros
 

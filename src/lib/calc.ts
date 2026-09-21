@@ -6,7 +6,7 @@ import type {
   Settings,
   VariableExpense,
 } from "@/db/schema";
-import { biweekForDueDay, biweekOf, type Biweek } from "./period";
+import { biweekForDueDay, biweekLabel, biweekOf, type Biweek } from "./period";
 import { round2 } from "./money";
 
 // Umbral de alerta: categoría que consume > 15% del ingreso.
@@ -34,7 +34,7 @@ export type Totals = {
   available: number;
 };
 
-export type BiweekSummary = Totals & { biweek: Biweek };
+export type BiweekSummary = Totals & { biweek: Biweek; range: string };
 
 export type CategorySummary = {
   category: Category;
@@ -97,11 +97,12 @@ export function computeMonth(data: MonthData): MonthSummary {
   };
 
   const biweek = (n: Biweek): BiweekSummary => {
-    const inc = sum(incomes.filter((i) => biweekOf(i.date) === n).map((i) => i.amount));
+    const inc = sum(incomes.filter((i) => biweekOf(i.date, settings) === n).map((i) => i.amount));
     const fix = sum(fixed.filter((f) => f.biweek === n).map((f) => f.amount));
-    const vari = sum(variable.filter((v) => biweekOf(v.date) === n).map((v) => v.amount));
+    const vari = sum(variable.filter((v) => biweekOf(v.date, settings) === n).map((v) => v.amount));
     return {
       biweek: n,
+      range: biweekLabel(n, settings),
       income: inc,
       fixed: fix,
       variable: vari,
@@ -159,7 +160,7 @@ export function computeMonth(data: MonthData): MonthSummary {
     };
   });
 
-  const misassignedFixed = fixed.filter((f) => biweekForDueDay(f.dueDay) !== f.biweek);
+  const misassignedFixed = fixed.filter((f) => biweekForDueDay(f.dueDay, settings) !== f.biweek);
   const wants = byType.find((t) => t.type === "deseo")!;
 
   return {

@@ -16,11 +16,11 @@ import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from "@/components/u
 import type { Income } from "@/db/schema";
 import { feedback } from "@/lib/action-feedback";
 import { money } from "@/lib/money";
-import { biweekOf, formatDate, formatPeriod } from "@/lib/period";
+import { biweekOf, formatDate, formatPeriod, type PayDays } from "@/lib/period";
 
-type Props = { rows: Income[]; period: string };
+type Props = { rows: Income[]; period: string; payDays: PayDays };
 
-export function IncomeList({ rows, period }: Props) {
+export function IncomeList({ rows, period, payDays }: Props) {
   const [editing, setEditing] = useState<Income | "new" | null>(null);
   const remove = useAction(deleteIncome, feedback("Ingreso eliminado"));
   const total = rows.reduce((a, r) => a + r.amount, 0);
@@ -55,7 +55,7 @@ export function IncomeList({ rows, period }: Props) {
                 <div className="flex min-w-0 flex-1 flex-col">
                   <span className="truncate font-medium">{r.source}</span>
                   <span className="flex items-center gap-2 text-xs text-muted-foreground">
-                    {formatDate(r.date)} · Q{biweekOf(r.date)}
+                    {formatDate(r.date)} · Q{biweekOf(r.date, payDays)}
                     {r.type === "ingreso_extra" && <Badge variant="secondary">Extra</Badge>}
                   </span>
                 </div>

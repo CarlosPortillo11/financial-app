@@ -33,7 +33,7 @@ export function BiweekCards({ biweeks }: { biweeks: BiweekSummary[] }) {
             <div className="flex items-baseline justify-between">
               <span className="font-medium">Quincena {q.biweek}</span>
               <span className="text-xs text-muted-foreground">
-                {q.biweek === 1 ? "días 1 al 15" : "días 16 al fin de mes"}
+                {q.range}
               </span>
             </div>
             <dl className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-sm">

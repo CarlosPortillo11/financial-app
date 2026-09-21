@@ -5,7 +5,7 @@ import { useAction } from "next-safe-action/hooks";
 import { useForm } from "react-hook-form";
 import { updateSettings } from "@/actions/settings";
 import { Button } from "@/components/ui/button";
-import { FieldGroup, FieldLegend, FieldSet } from "@/components/ui/field";
+import { FieldDescription, FieldGroup, FieldLegend, FieldSet } from "@/components/ui/field";
 import { Spinner } from "@/components/ui/spinner";
 import type { Settings } from "@/db/schema";
 import { feedback } from "@/lib/action-feedback";
@@ -21,6 +21,8 @@ export function SettingsForm({ initial }: { initial: Settings }) {
       savingsPct: initial.savingsPct,
       savingSplitPct: initial.savingSplitPct,
       investSplitPct: initial.investSplitPct,
+      payDay1: initial.payDay1,
+      payDay2: initial.payDay2,
     },
   });
   const { execute, isPending } = useAction(updateSettings, feedback("Ajustes guardados"));
@@ -42,6 +44,16 @@ export function SettingsForm({ initial }: { initial: Settings }) {
           <div className="grid grid-cols-2 gap-3">
             <NumberField control={c} name="savingSplitPct" label="Ahorro %" step="1" min={0} max={100} />
             <NumberField control={c} name="investSplitPct" label="Inversión %" step="1" min={0} max={100} />
+          </div>
+        </FieldSet>
+        <FieldSet>
+          <FieldLegend>Días de pago</FieldLegend>
+          <FieldDescription>
+            Quincena 1 va del primer pago al día antes del segundo; Quincena 2 cubre el resto, incluido el inicio del mes siguiente.
+          </FieldDescription>
+          <div className="grid grid-cols-2 gap-3">
+            <NumberField control={c} name="payDay1" label="Primer pago (día)" step="1" min={1} max={31} />
+            <NumberField control={c} name="payDay2" label="Segundo pago (día)" step="1" min={1} max={31} />
           </div>
         </FieldSet>
         <Button type="submit" disabled={isPending} className="w-full sm:w-auto sm:self-start">

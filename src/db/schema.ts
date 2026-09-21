@@ -109,9 +109,13 @@ export const settings = pgTable(
     savingsPct: smallint("savings_pct").notNull().default(20),
     savingSplitPct: smallint("saving_split_pct").notNull().default(10),
     investSplitPct: smallint("invest_split_pct").notNull().default(10),
+    // Días de nómina. Q1 = [payDay1, payDay2), Q2 = resto del mes.
+    payDay1: smallint("pay_day_1").notNull().default(14),
+    payDay2: smallint("pay_day_2").notNull().default(28),
   },
   (t) => [
     check("settings_single_row", sql`${t.id} = 1`),
+    check("settings_pay_days", sql`${t.payDay1} between 1 and 31 and ${t.payDay2} between 1 and 31 and ${t.payDay1} < ${t.payDay2}`),
     check("settings_rule_sum", sql`${t.needsPct} + ${t.wantsPct} + ${t.savingsPct} = 100`),
     check("settings_split_sum", sql`${t.savingSplitPct} + ${t.investSplitPct} = ${t.savingsPct}`),
   ],
