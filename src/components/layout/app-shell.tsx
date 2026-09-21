@@ -1,14 +1,16 @@
 import { Suspense } from "react";
-import type { Category } from "@/db/schema";
+import type { Card, Category } from "@/db/schema";
 import { IconLinks, SidebarNav, TabBar } from "./nav";
 import { MonthPicker } from "./month-picker";
 import { QuickAdd } from "./quick-add";
 
 export function AppShell({
   categories,
+  cards,
   children,
 }: {
   categories: Category[];
+  cards: Card[];
   children: React.ReactNode;
 }) {
   return (
@@ -41,7 +43,7 @@ export function AppShell({
         </main>
       </div>
 
-      <QuickAdd categories={categories} />
+      <QuickAdd categories={categories} cards={cards} />
       <Suspense>
         <TabBar />
       </Suspense>

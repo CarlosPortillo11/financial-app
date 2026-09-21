@@ -12,17 +12,18 @@ import { RowMenu } from "@/components/shared/row-menu";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from "@/components/ui/empty";
-import type { Category, VariableExpense } from "@/db/schema";
+import type { Card as CardRow, Category, VariableExpense } from "@/db/schema";
 import { feedback } from "@/lib/action-feedback";
 import { money } from "@/lib/money";
 import { biweekOf, formatDate, formatPeriod, type PayDays } from "@/lib/period";
 
-type Props = { rows: VariableExpense[]; categories: Category[]; period: string; payDays: PayDays };
+type Props = { rows: VariableExpense[]; categories: Category[]; cards: CardRow[]; period: string; payDays: PayDays };
 
-export function VariableExpenseList({ rows, categories, period, payDays }: Props) {
+export function VariableExpenseList({ rows, categories, cards, period, payDays }: Props) {
   const [editing, setEditing] = useState<VariableExpense | "new" | null>(null);
   const remove = useAction(deleteVariableExpense, feedback("Gasto eliminado"));
   const byId = new Map(categories.map((c) => [c.id, c]));
+  const cardById = new Map(cards.map((c) => [c.id, c]));
   const total = rows.reduce((a, r) => a + r.amount, 0);
 
   // Agrupado por fecha (ya vienen ordenados desc).
@@ -75,8 +76,10 @@ export function VariableExpenseList({ rows, categories, period, payDays }: Props
                       </span>
                       <div className="flex min-w-0 flex-1 flex-col">
                         <span className="truncate font-medium">{r.description || cat?.name}</span>
-                        {r.description && (
-                          <span className="truncate text-xs text-muted-foreground">{cat?.name}</span>
+                        {(r.description || r.cardId) && (
+                          <span className="truncate text-xs text-muted-foreground">
+                            {[r.description && cat?.name, cardById.get(r.cardId ?? 0)?.name].filter(Boolean).join(" · ")}
+                          </span>
                         )}
                       </div>
                       <Amount value={r.amount} className="font-medium" />
@@ -102,6 +105,7 @@ export function VariableExpenseList({ rows, categories, period, payDays }: Props
         <VariableExpenseForm
           key={editing === "new" ? "new" : editing?.id}
           categories={categories}
+          cards={cards}
           initial={editing === "new" || editing === null ? undefined : editing}
           onDone={() => setEditing(null)}
         />

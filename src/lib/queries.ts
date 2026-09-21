@@ -1,8 +1,9 @@
-import { and, asc, desc, eq, gte, lt, max } from "drizzle-orm";
+import { and, asc, desc, eq, gte, isNotNull, lt, max } from "drizzle-orm";
 import { db } from "@/db";
-import { categories, fixedExpenses, incomes, settings, variableExpenses } from "@/db/schema";
+import { cards, categories, fixedExpenses, incomes, settings, variableExpenses } from "@/db/schema";
+import { computeStatement, dayOn, type CardStatement } from "./cards";
 import { computeMonth, type MonthData, type MonthSummary } from "./calc";
-import { currentPeriod, periodRange } from "./period";
+import { currentPeriod, periodRange, shiftPeriod, today } from "./period";
 
 export async function getCategories(onlyActive = false) {
   return db.query.categories.findMany({
@@ -42,8 +43,9 @@ export async function ensureFixedForPeriod(period: string) {
   if (!source.length) return;
 
   await db.insert(fixedExpenses).values(
-    source.map(({ categoryId, description, amount, biweek, dueDay }) => ({
+    source.map(({ categoryId, cardId, description, amount, biweek, dueDay }) => ({
       categoryId,
+      cardId,
       description,
       amount,
       biweek,
@@ -92,4 +94,37 @@ export async function getMonthData(period: string): Promise<MonthData> {
 
 export async function getMonthSummary(period: string): Promise<MonthSummary> {
   return computeMonth(await getMonthData(period));
+}
+
+export async function getCards() {
+  return db.query.cards.findMany({
+    orderBy: [asc(cards.name)],
+  });
+}
+
+/** Estado de cuenta por tarjeta activa: cerrado (por pagar) y abierto (acumulando). */
+export async function getCardStatements(): Promise<CardStatement[]> {
+  const list = await getCards();
+  if (!list.length) return [];
+  const now = today();
+  // Dos cortes hacia atrás cubren el estado cerrado y el abierto de cualquier tarjeta.
+  const since = `${shiftPeriod(now.slice(0, 7), -2)}-01`;
+  const [vari, fixed] = await Promise.all([
+    db.query.variableExpenses.findMany({
+      where: and(isNotNull(variableExpenses.cardId), gte(variableExpenses.date, since)),
+      columns: { cardId: true, amount: true, date: true },
+    }),
+    db.query.fixedExpenses.findMany({
+      where: and(isNotNull(fixedExpenses.cardId), gte(fixedExpenses.period, since.slice(0, 7))),
+      columns: { cardId: true, amount: true, period: true, dueDay: true },
+    }),
+  ]);
+  const charges = [
+    ...vari,
+    ...fixed.map((f) => {
+      const [y, m] = f.period.split("-").map(Number);
+      return { cardId: f.cardId, amount: f.amount, date: dayOn(y, m, f.dueDay) };
+    }),
+  ];
+  return list.map((c) => computeStatement(c, charges, now));
 }

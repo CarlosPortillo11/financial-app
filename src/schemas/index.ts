@@ -41,6 +41,7 @@ export type CategoryInput = z.infer<typeof categorySchema>;
 
 export const fixedExpenseSchema = z.object({
   categoryId: z.number({ error: "Elige una categoría" }).int().positive(),
+  cardId: idSchema.nullable(),
   description: description.min(1, "Describe el gasto"),
   amount: amountSchema,
   period: periodSchema,
@@ -53,6 +54,7 @@ export type FixedExpenseInput = z.infer<typeof fixedExpenseSchema>;
 
 export const variableExpenseSchema = z.object({
   categoryId: z.number({ error: "Elige una categoría" }).int().positive(),
+  cardId: idSchema.nullable(),
   description,
   amount: amountSchema,
   date: dateSchema,
@@ -95,3 +97,10 @@ export type SettingsInput = z.infer<typeof settingsSchema>;
 
 export const withId = <T extends z.ZodRawShape>(shape: z.ZodObject<T>) =>
   shape.extend({ id: idSchema });
+
+export const cardSchema = z.object({
+  name: z.string().trim().min(1, "Ponle nombre").max(60, "Máximo 60 caracteres"),
+  cutDay: dayField,
+  payDay: dayField,
+});
+export type CardInput = z.infer<typeof cardSchema>;

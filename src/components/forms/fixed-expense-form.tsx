@@ -8,25 +8,27 @@ import { Button } from "@/components/ui/button";
 import { Field, FieldDescription, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Spinner } from "@/components/ui/spinner";
 import { Switch } from "@/components/ui/switch";
-import type { Category, FixedExpense } from "@/db/schema";
+import type { Card, Category, FixedExpense } from "@/db/schema";
 import { feedback } from "@/lib/action-feedback";
 import { BIWEEK_OPTIONS, STATUS_OPTIONS } from "@/lib/labels";
 import { fixedExpenseSchema, type FixedExpenseInput } from "@/schemas";
-import { CategoryField, NumberField, SelectField, TextField } from "./fields";
+import { CardField, CategoryField, NumberField, SelectField, TextField } from "./fields";
 
 type Props = {
   categories: Category[];
+  cards: Card[];
   period: string;
   initial?: FixedExpense;
   onDone: () => void;
 };
 
-export function FixedExpenseForm({ categories, period, initial, onDone }: Props) {
+export function FixedExpenseForm({ categories, cards, period, initial, onDone }: Props) {
   const form = useForm<FixedExpenseInput>({
     resolver: zodResolver(fixedExpenseSchema),
     defaultValues: initial
       ? {
           categoryId: initial.categoryId,
+          cardId: initial.cardId,
           description: initial.description,
           amount: initial.amount,
           period: initial.period,
@@ -35,7 +37,7 @@ export function FixedExpenseForm({ categories, period, initial, onDone }: Props)
           status: initial.status,
           active: initial.active,
         }
-      : { description: "", period, biweek: 1, status: "pendiente", active: true },
+      : { description: "", period, biweek: 1, status: "pendiente", active: true, cardId: null },
   });
   const create = useAction(createFixedExpense, feedback("Gasto fijo guardado", onDone));
   const update = useAction(updateFixedExpense, feedback("Gasto fijo actualizado", onDone));
@@ -80,7 +82,10 @@ export function FixedExpenseForm({ categories, period, initial, onDone }: Props)
             numeric
           />
         </div>
-        <SelectField control={form.control} name="status" label="Estado" options={STATUS_OPTIONS} />
+        <div className="grid grid-cols-2 gap-4">
+          <SelectField control={form.control} name="status" label="Estado" options={STATUS_OPTIONS} />
+          <CardField control={form.control} name="cardId" label="Se carga a" cards={cards} />
+        </div>
         <Controller
           control={form.control}
           name="active"

@@ -38,6 +38,25 @@ export const categories = pgTable(
   },
 );
 
+export const cards = pgTable(
+  "cards",
+  {
+    id: serial("id").primaryKey(),
+    name: varchar("name", { length: 60 }).notNull().unique(),
+    cutDay: smallint("cut_day").notNull(),
+    payDay: smallint("pay_day").notNull(),
+    // ponytail: solo se guarda el último corte pagado (YYYY-MM del corte); sin historial de pagos.
+    paidStatement: varchar("paid_statement", { length: 7 }),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    check("cards_cut_day_check", sql`${t.cutDay} between 1 and 31`),
+    check("cards_pay_day_check", sql`${t.payDay} between 1 and 31`),
+  ],
+);
+
+const cardRef = () => integer("card_id").references(() => cards.id, { onDelete: "set null" });
+
 export const fixedExpenses = pgTable(
   "fixed_expenses",
   {
@@ -45,6 +64,7 @@ export const fixedExpenses = pgTable(
     categoryId: integer("category_id")
       .notNull()
       .references(() => categories.id, { onDelete: "restrict" }),
+    cardId: cardRef(),
     description: varchar("description", { length: 120 }).notNull(),
     amount: money(),
     // YYYY-MM. Mes explícito porque un fijo no tiene fecha de movimiento.
@@ -71,6 +91,7 @@ export const variableExpenses = pgTable(
     categoryId: integer("category_id")
       .notNull()
       .references(() => categories.id, { onDelete: "restrict" }),
+    cardId: cardRef(),
     description: varchar("description", { length: 120 }).notNull().default(""),
     amount: money(),
     // Quincena y mes se derivan de esta fecha.
@@ -126,4 +147,5 @@ export type FixedExpense = typeof fixedExpenses.$inferSelect;
 export type VariableExpense = typeof variableExpenses.$inferSelect;
 export type Income = typeof incomes.$inferSelect;
 export type Settings = typeof settings.$inferSelect;
+export type Card = typeof cards.$inferSelect;
 export type CategoryType = Category["type"];

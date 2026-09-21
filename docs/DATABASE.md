@@ -33,12 +33,26 @@ settings           (fila única)
 
 Borrado físico solo si no tiene movimientos: ambas FK son `ON DELETE RESTRICT`.
 
+## `cards`
+
+| Columna | Tipo | Restricción | Notas |
+| --- | --- | --- | --- |
+| `id` | serial | PK | |
+| `name` | varchar(60) | not null, unique | |
+| `cut_day` | smallint | not null, `1..31` | Día de corte |
+| `pay_day` | smallint | not null, `1..31` | Día límite de pago; si es ≤ `cut_day` cae en el mes siguiente |
+| `paid_statement` | varchar(7) | nullable | `YYYY-MM` del último corte marcado como pagado; sin historial |
+| `created_at` | timestamptz | not null, default now() | |
+
+Estado de cuenta, monto por pagar y alertas se calculan en `lib/cards.ts` a partir de los movimientos con `card_id`; el pago de la tarjeta no es un gasto (los cargos ya lo son).
+
 ## `fixed_expenses`
 
 | Columna | Tipo | Restricción | Notas |
 | --- | --- | --- | --- |
 | `id` | serial | PK | |
 | `category_id` | integer | FK → categories, restrict | |
+| `card_id` | integer | FK → cards, set null | Tarjeta con la que se paga (null = efectivo/débito) |
 | `description` | varchar(120) | not null | |
 | `amount` | numeric(12,2) | not null, `> 0` | |
 | `period` | varchar(7) | not null, `^[0-9]{4}-(0[1-9]\|1[0-2])$`, **index** | `YYYY-MM`. Mes explícito: un fijo no tiene fecha de movimiento |
@@ -58,6 +72,7 @@ datos, en `pendiente`. Meses pasados nunca se rellenan.
 | --- | --- | --- | --- |
 | `id` | serial | PK | |
 | `category_id` | integer | FK → categories, restrict | |
+| `card_id` | integer | FK → cards, set null | Tarjeta con la que se paga (null = efectivo/débito) |
 | `description` | varchar(120) | not null, default `''` | Opcional en la captura rápida |
 | `amount` | numeric(12,2) | not null, `> 0` | |
 | `date` | date | not null, **index** | Mes y quincena se derivan (día en [`pay_day_1`, `pay_day_2`) → Q1, resto Q2) |

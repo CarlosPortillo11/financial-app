@@ -1,7 +1,7 @@
 "use client";
 
 import { Controller, type Control, type FieldValues, type Path } from "react-hook-form";
-import type { Category } from "@/db/schema";
+import type { Card, Category } from "@/db/schema";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import {
@@ -130,7 +130,7 @@ export function SelectField<T extends FieldValues>({
           <Select
             name={field.name}
             value={field.value == null || field.value === "" ? "" : String(field.value)}
-            onValueChange={(v) => field.onChange(numeric ? Number(v) : v)}
+            onValueChange={(v) => field.onChange(numeric ? Number(v) || null : v)}
           >
             <SelectTrigger id={field.name} className="w-full" aria-invalid={fieldState.invalid}>
               <SelectValue placeholder={placeholder} />
@@ -165,6 +165,24 @@ export function CategoryField<T extends FieldValues>({
         value: String(c.id),
         label: <CategoryLabel category={c} />,
       }))}
+    />
+  );
+}
+
+/** Tarjeta opcional; "0" = efectivo/débito (null en el form). */
+export function CardField<T extends FieldValues>({
+  cards,
+  ...props
+}: Base<T> & { cards: Card[] }) {
+  return (
+    <SelectField
+      {...props}
+      numeric
+      placeholder="Efectivo / débito"
+      options={[
+        { value: "0", label: "Efectivo / débito" },
+        ...cards.map((c) => ({ value: String(c.id), label: c.name })),
+      ]}
     />
   );
 }

@@ -21,14 +21,14 @@ const data: MonthData = {
     { id: 2, source: "s", type: "salario", amount: 4000, date: "2026-09-16", createdAt: now },
   ],
   fixed: [
-    { id: 1, categoryId: 1, description: "renta", amount: 3000, period: "2026-09", biweek: 1, dueDay: 20, status: "pendiente", active: true, createdAt: now },
+    { id: 1, categoryId: 1, cardId: null, description: "renta", amount: 3000, period: "2026-09", biweek: 1, dueDay: 20, status: "pendiente", active: true, createdAt: now },
     // vence el 5 (lo paga la nómina del 28) pero está en quincena 1: mal asignado
-    { id: 2, categoryId: 2, description: "netflix", amount: 200, period: "2026-09", biweek: 1, dueDay: 5, status: "pendiente", active: true, createdAt: now },
+    { id: 2, categoryId: 2, cardId: null, description: "netflix", amount: 200, period: "2026-09", biweek: 1, dueDay: 5, status: "pendiente", active: true, createdAt: now },
   ],
   variable: [
-    { id: 1, categoryId: 1, description: "", amount: 1500, date: "2026-09-10", createdAt: now },
-    { id: 2, categoryId: 2, description: "", amount: 1800, date: "2026-09-20", createdAt: now },
-    { id: 3, categoryId: 3, description: "", amount: 1000, date: "2026-09-28", createdAt: now },
+    { id: 1, categoryId: 1, cardId: null, description: "", amount: 1500, date: "2026-09-10", createdAt: now },
+    { id: 2, categoryId: 2, cardId: null, description: "", amount: 1800, date: "2026-09-20", createdAt: now },
+    { id: 3, categoryId: 3, cardId: null, description: "", amount: 1000, date: "2026-09-28", createdAt: now },
   ],
   settings: { id: 1, needsPct: 50, wantsPct: 30, savingsPct: 20, savingSplitPct: 10, investSplitPct: 10, payDay1: 14, payDay2: 28 },
 };

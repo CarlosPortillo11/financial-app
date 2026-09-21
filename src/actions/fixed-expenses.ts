@@ -44,9 +44,10 @@ export const duplicateFixedToNextMonth = actionClient
   .action(async ({ parsedInput: { id } }) => {
     const row = await db.query.fixedExpenses.findFirst({ where: eq(fixedExpenses.id, id) });
     if (!row) throw new Error("No existe");
-    const { categoryId, description, amount, biweek, dueDay, active } = row;
+    const { categoryId, cardId, description, amount, biweek, dueDay, active } = row;
     await db.insert(fixedExpenses).values({
       categoryId,
+      cardId,
       description,
       amount,
       biweek,

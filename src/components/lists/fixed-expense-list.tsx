@@ -19,20 +19,21 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from "@/components/ui/empty";
 import { Switch } from "@/components/ui/switch";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import type { Category, FixedExpense } from "@/db/schema";
+import type { Card as CardRow, Category, FixedExpense } from "@/db/schema";
 import { feedback } from "@/lib/action-feedback";
 import { money } from "@/lib/money";
 import { biweekForDueDay, formatPeriod, type PayDays } from "@/lib/period";
 import { cn } from "@/lib/utils";
 
-type Props = { rows: FixedExpense[]; categories: Category[]; period: string; payDays: PayDays; highlightId?: number };
+type Props = { rows: FixedExpense[]; categories: Category[]; cards: CardRow[]; period: string; payDays: PayDays; highlightId?: number };
 
-export function FixedExpenseList({ rows, categories, period, payDays, highlightId }: Props) {
+export function FixedExpenseList({ rows, categories, cards, period, payDays, highlightId }: Props) {
   const [editing, setEditing] = useState<FixedExpense | "new" | null>(null);
   const remove = useAction(deleteFixedExpense, feedback("Gasto fijo eliminado"));
   const status = useAction(setFixedStatus, { onError: feedback("").onError });
   const duplicate = useAction(duplicateFixedToNextMonth, feedback("Copiado al mes siguiente"));
   const byId = new Map(categories.map((c) => [c.id, c]));
+  const cardById = new Map(cards.map((c) => [c.id, c]));
   const total = rows.reduce((a, r) => a + r.amount, 0);
   const pending = rows.filter((r) => r.status === "pendiente").reduce((a, r) => a + r.amount, 0);
 
@@ -105,6 +106,7 @@ export function FixedExpenseList({ rows, categories, period, payDays, highlightI
                         <span className="flex items-center gap-2 text-xs text-muted-foreground">
                           {cat && <CategoryLabel category={cat} className="[&>span:first-child]:text-xs" />}
                           <span>· día {r.dueDay}</span>
+                          {r.cardId && <span>· {cardById.get(r.cardId)?.name}</span>}
                           {misassigned && (
                             <Tooltip>
                               <TooltipTrigger asChild>
@@ -156,6 +158,7 @@ export function FixedExpenseList({ rows, categories, period, payDays, highlightI
         <FixedExpenseForm
           key={editing === "new" ? "new" : editing?.id}
           categories={categories}
+          cards={cards}
           period={period}
           initial={editing === "new" || editing === null ? undefined : editing}
           onDone={() => setEditing(null)}

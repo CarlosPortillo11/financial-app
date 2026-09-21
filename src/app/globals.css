@@ -166,3 +166,17 @@
 .tnum {
   font-variant-numeric: tabular-nums;
 }
+
+/* Campana del aviso de pago de tarjeta. */
+@keyframes ring {
+  0%, 60%, 100% { transform: rotate(0); }
+  10% { transform: rotate(16deg); }
+  20% { transform: rotate(-14deg); }
+  30% { transform: rotate(10deg); }
+  40% { transform: rotate(-8deg); }
+  50% { transform: rotate(4deg); }
+}
+.animate-ring {
+  animation: ring 1.8s ease-in-out infinite;
+  transform-origin: 50% 10%;
+}

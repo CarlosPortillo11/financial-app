@@ -1,5 +1,6 @@
 import {
   CalendarClockIcon,
+  CreditCardIcon,
   LayoutDashboardIcon,
   LightbulbIcon,
   ReceiptIcon,
@@ -14,6 +15,7 @@ export const NAV = [
   { href: "/variables", label: "Variables", icon: ReceiptIcon },
   { href: "/ingresos", label: "Ingresos", icon: WalletIcon },
   { href: "/consejos", label: "Consejos", icon: LightbulbIcon },
+  { href: "/tarjetas", label: "Tarjetas", icon: CreditCardIcon },
   { href: "/categorias", label: "Categorías", icon: TagsIcon },
   { href: "/ajustes", label: "Ajustes", icon: Settings2Icon },
 ] as const;
