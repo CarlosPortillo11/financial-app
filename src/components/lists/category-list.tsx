@@ -11,7 +11,8 @@ import { ResponsiveModal } from "@/components/shared/responsive-modal";
 import { RowMenu } from "@/components/shared/row-menu";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Bento, BentoTile } from "@/components/shared/bento";
+import { FolderPanel } from "@/components/shared/folder-panel";
 import { Switch } from "@/components/ui/switch";
 import type { Category, CategoryType } from "@/db/schema";
 import { feedback } from "@/lib/action-feedback";
@@ -19,7 +20,11 @@ import { TYPE_LABEL } from "@/lib/calc";
 import { TYPE_COLOR } from "@/lib/labels";
 import { cn } from "@/lib/utils";
 
-const SCOPE_BADGE = { fijo: "Fijos", variable: "Variables", ambos: null } as const;
+const SCOPE_BADGE = {
+  fijo: "Fijos",
+  variable: "Variables",
+  ambos: null,
+} as const;
 
 export function CategoryList({ rows }: { rows: Category[] }) {
   const [editing, setEditing] = useState<Category | "new" | null>(null);
@@ -42,40 +47,49 @@ export function CategoryList({ rows }: { rows: Category[] }) {
       {(Object.keys(TYPE_LABEL) as CategoryType[]).map((type) => {
         const items = rows.filter((c) => c.type === type);
         return (
-          <Card key={type} size="sm">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <span className={cn("size-2 rounded-full", TYPE_COLOR[type])} aria-hidden />
-                {TYPE_LABEL[type]}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="flex flex-col divide-y divide-border/60 px-0">
-              {items.length === 0 && (
-                <p className="px-4 py-2 text-sm text-muted-foreground">Sin categorías.</p>
-              )}
-              {items.map((c) => (
-                <div
-                  key={c.id}
-                  className={cn("flex items-center gap-3 px-4 py-2.5", !c.active && "opacity-50")}
-                >
-                  <CategoryLabel category={c} className="min-w-0 flex-1 font-medium" />
-                  {SCOPE_BADGE[c.appliesTo] && (
-                    <Badge variant="secondary">{SCOPE_BADGE[c.appliesTo]}</Badge>
-                  )}
-                  <Switch
-                    aria-label={c.active ? "Desactivar" : "Activar"}
-                    checked={c.active}
-                    onCheckedChange={(active) => toggle.execute({ id: c.id, active })}
-                  />
-                  <RowMenu
-                    deleteLabel={c.name}
-                    onEdit={() => setEditing(c)}
-                    onDelete={() => remove.execute({ id: c.id })}
-                  />
-                </div>
-              ))}
-            </CardContent>
-          </Card>
+          <FolderPanel
+            key={type}
+            title={TYPE_LABEL[type]}
+            actions={
+              <span className={cn("mr-1 size-2.5 rounded-full", TYPE_COLOR[type])} aria-hidden />
+            }
+          >
+            {items.length === 0 ? (
+              <p className="text-sm text-muted-foreground">Sin categorías.</p>
+            ) : (
+              <Bento className="md:grid-cols-3">
+                {items.map((c, i) => (
+                  <BentoTile
+                    key={c.id}
+                    index={i}
+                    interactive
+                    className={cn(!c.active && "opacity-50")}
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <CategoryLabel category={c} className="min-w-0 font-medium" />
+                      <RowMenu
+                        deleteLabel={c.name}
+                        onEdit={() => setEditing(c)}
+                        onDelete={() => remove.execute({ id: c.id })}
+                      />
+                    </div>
+                    <div className="mt-auto flex items-center justify-between gap-2 pt-3">
+                      {SCOPE_BADGE[c.appliesTo] ? (
+                        <Badge variant="secondary">{SCOPE_BADGE[c.appliesTo]}</Badge>
+                      ) : (
+                        <span />
+                      )}
+                      <Switch
+                        aria-label={c.active ? "Desactivar" : "Activar"}
+                        checked={c.active}
+                        onCheckedChange={(active) => toggle.execute({ id: c.id, active })}
+                      />
+                    </div>
+                  </BentoTile>
+                ))}
+              </Bento>
+            )}
+          </FolderPanel>
         );
       })}
 

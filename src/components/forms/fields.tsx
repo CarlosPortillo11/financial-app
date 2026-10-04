@@ -2,8 +2,9 @@
 
 import { Controller, type Control, type FieldValues, type Path } from "react-hook-form";
 import type { Card, Category } from "@/db/schema";
-import { Field, FieldError, FieldLabel } from "@/components/ui/field";
+import { Field, FieldDescription, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
 import {
   Select,
   SelectContent,
@@ -22,7 +23,9 @@ export function TextField<T extends FieldValues>({
   label,
   placeholder,
   autoFocus,
-}: Base<T> & { placeholder?: string; autoFocus?: boolean }) {
+  type = "text",
+  autoComplete,
+}: Base<T> & { placeholder?: string; autoFocus?: boolean; type?: string; autoComplete?: string }) {
   return (
     <Controller
       control={control}
@@ -33,6 +36,8 @@ export function TextField<T extends FieldValues>({
           <Input
             {...field}
             id={field.name}
+            type={type}
+            autoComplete={autoComplete}
             placeholder={placeholder}
             autoFocus={autoFocus}
             aria-invalid={fieldState.invalid}
@@ -183,6 +188,29 @@ export function CardField<T extends FieldValues>({
         { value: "0", label: "Efectivo / débito" },
         ...cards.map((c) => ({ value: String(c.id), label: c.name })),
       ]}
+    />
+  );
+}
+
+export function SwitchField<T extends FieldValues>({
+  control,
+  name,
+  label,
+  description,
+}: Base<T> & { description: string }) {
+  return (
+    <Controller
+      control={control}
+      name={name}
+      render={({ field }) => (
+        <Field orientation="horizontal">
+          <div className="flex flex-col gap-0.5">
+            <FieldLabel htmlFor={field.name}>{label}</FieldLabel>
+            <FieldDescription>{description}</FieldDescription>
+          </div>
+          <Switch id={field.name} checked={field.value} onCheckedChange={field.onChange} />
+        </Field>
+      )}
     />
   );
 }

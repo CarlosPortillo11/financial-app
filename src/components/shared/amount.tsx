@@ -1,4 +1,6 @@
-import { money } from "@/lib/money";
+"use client";
+
+import { useMoney } from "@/components/layout/preferences";
 import { cn } from "@/lib/utils";
 
 type Props = {
@@ -10,6 +12,7 @@ type Props = {
 };
 
 export function Amount({ value, className, signed, tone }: Props) {
+  const money = useMoney();
   return (
     <span
       className={cn(

@@ -6,10 +6,11 @@ import type {
   Settings,
   VariableExpense,
 } from "@/db/schema";
-import { biweekForDueDay, biweekLabel, biweekOf, type Biweek } from "./period";
+import { daysBetween } from "./cards";
+import { biweekForDueDay, biweekLabel, biweekOf, nextPayDate, type Biweek, type PayDays } from "./period";
 import { round2 } from "./money";
 
-// Umbral de alerta: categoría que consume > 15% del ingreso.
+// Umbral de alerta: categoría de deseos que consume > 15% del ingreso.
 export const HIGH_CATEGORY_RATIO = 0.15;
 
 export const TYPE_LABEL: Record<CategoryType, string> = {
@@ -24,9 +25,11 @@ export type MonthData = {
   variable: VariableExpense[];
   incomes: Income[];
   settings: Settings;
+  carryOver: number;
 };
 
 export type Totals = {
+  carryOver: number;
   income: number;
   fixed: number;
   variable: number;
@@ -82,32 +85,35 @@ const sum = (ns: number[]) => round2(ns.reduce((a, b) => a + b, 0));
 const ratio = (part: number, whole: number) => (whole > 0 ? part / whole : 0);
 
 export function computeMonth(data: MonthData): MonthSummary {
-  const { categories, fixed, variable, incomes, settings } = data;
+  const { categories, fixed, variable, incomes, settings, carryOver } = data;
 
   const income = sum(incomes.map((i) => i.amount));
   const fixedTotal = sum(fixed.map((f) => f.amount));
   const variableTotal = sum(variable.map((v) => v.amount));
   const spent = round2(fixedTotal + variableTotal);
   const totals: Totals = {
+    carryOver,
     income,
     fixed: fixedTotal,
     variable: variableTotal,
     spent,
-    available: round2(income - spent),
+    available: round2(carryOver + income - spent),
   };
 
   const biweek = (n: Biweek): BiweekSummary => {
+    const carry = n === 1 ? carryOver : 0;
     const inc = sum(incomes.filter((i) => biweekOf(i.date, settings) === n).map((i) => i.amount));
     const fix = sum(fixed.filter((f) => f.biweek === n).map((f) => f.amount));
     const vari = sum(variable.filter((v) => biweekOf(v.date, settings) === n).map((v) => v.amount));
     return {
       biweek: n,
       range: biweekLabel(n, settings),
+      carryOver: carry,
       income: inc,
       fixed: fix,
       variable: vari,
       spent: round2(fix + vari),
-      available: round2(inc - fix - vari),
+      available: round2(carry + inc - fix - vari),
     };
   };
 
@@ -126,7 +132,7 @@ export function computeMonth(data: MonthData): MonthSummary {
         total,
         pctOfSpent: ratio(total, spent),
         pctOfIncome,
-        high: pctOfIncome > HIGH_CATEGORY_RATIO,
+        high: category.type === "deseo" && pctOfIncome > HIGH_CATEGORY_RATIO,
       };
     })
     .filter((c) => c.total > 0)
@@ -162,6 +168,9 @@ export function computeMonth(data: MonthData): MonthSummary {
 
   const misassignedFixed = fixed.filter((f) => biweekForDueDay(f.dueDay, settings) !== f.biweek);
   const wants = byType.find((t) => t.type === "deseo")!;
+  const savings = byType.find((t) => t.type === "ahorro_inversion")!;
+  const savingLeft = Math.max(0, savings.target - savings.actual);
+  const saving = round2(savingLeft * ratio(settings.savingSplitPct, settings.savingsPct));
 
   return {
     totals,
@@ -173,9 +182,9 @@ export function computeMonth(data: MonthData): MonthSummary {
       misassignedFixed,
     },
     suggestions: {
-      saving: round2((settings.savingSplitPct / 100) * income),
-      invest: round2((settings.investSplitPct / 100) * income),
-      guiltFree: Math.max(0, round2(wants.target - wants.actual)),
+      saving,
+      invest: round2(savingLeft - saving),
+      guiltFree: Math.max(0, round2(Math.min(wants.target - wants.actual, totals.available))),
     },
   };
 }
@@ -189,4 +198,13 @@ function ruleMessage(type: CategoryType, status: RuleStatus): string {
   if (status === "over") return "Excedes la meta, considera recortar";
   if (status === "under") return "Con margen";
   return "Justo en la meta";
+}
+
+export type DailyAllowance = { amount: number; days: number; until: string };
+
+export function dailyAllowance(s: MonthSummary, p: PayDays, today: string): DailyAllowance {
+  const left = biweekOf(today, p) === 1 ? s.byBiweek[0].available : s.totals.available;
+  const until = nextPayDate(today, p);
+  const days = daysBetween(today, until);
+  return { amount: round2(Math.max(0, left) / days), days, until };
 }

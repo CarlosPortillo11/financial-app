@@ -1,15 +1,16 @@
+import { requireSettings } from "@/lib/session";
 import { FixedExpenseList } from "@/components/lists/fixed-expense-list";
-import { getCards, getCategories, getFixedExpenses, getSettings } from "@/lib/queries";
+import { getCards, getCategories, getFixedExpenses } from "@/lib/queries";
 import { resolvePeriod } from "@/lib/search-params";
 
 export default async function FixedPage({ searchParams }: PageProps<"/fijos">) {
-  const period = await resolvePeriod(searchParams);
+  const settings = await requireSettings();
+  const period = await resolvePeriod(searchParams, settings);
   const { h } = await searchParams;
-  const [rows, categories, cards, settings] = await Promise.all([
-    getFixedExpenses(period),
-    getCategories(true),
-    getCards(),
-    getSettings(),
+  const [rows, categories, cards] = await Promise.all([
+    getFixedExpenses(settings, period),
+    getCategories(settings.userId, true),
+    getCards(settings.userId),
   ]);
   return (
     <FixedExpenseList

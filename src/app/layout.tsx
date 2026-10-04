@@ -1,16 +1,18 @@
 import type { Metadata, Viewport } from "next";
-import { Geist } from "next/font/google";
+import { Poppins } from "next/font/google";
 import "./globals.css";
-import { AppShell } from "@/components/layout/app-shell";
-import { CardDueAlert } from "@/components/layout/card-due-alert";
+import { ThemeProvider } from "@/components/layout/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { getCards, getCardStatements, getCategories } from "@/lib/queries";
 
 // Todo lee de la DB por request; nada se prerenderiza en build (Railway no tendrá DB al compilar).
 export const dynamic = "force-dynamic";
 
-const geist = Geist({ subsets: ["latin"], variable: "--font-geist-sans" });
+const poppins = Poppins({
+  subsets: ["latin"],
+  weight: ["300", "400", "500"],
+  variable: "--font-poppins",
+});
 
 export const metadata: Metadata = {
   title: "Finanzas",
@@ -18,25 +20,24 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#eef4f4",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#eae5e5" },
+    { media: "(prefers-color-scheme: dark)", color: "#141312" },
+  ],
   viewportFit: "cover",
 };
 
-export default async function RootLayout({ children }: LayoutProps<"/">) {
-  const [categories, cards, statements] = await Promise.all([
-    getCategories(true),
-    getCards(),
-    getCardStatements(),
-  ]);
+export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="es" className={`${geist.variable} h-full font-sans antialiased`}>
+    <html
+      lang="es"
+      suppressHydrationWarning
+      className={`${poppins.variable} h-full font-sans antialiased`}
+    >
       <body className="min-h-full flex flex-col">
-        <TooltipProvider>
-          <AppShell categories={categories} cards={cards}>
-            {children}
-          </AppShell>
-          <CardDueAlert due={statements.filter((s) => s.alert)} />
-        </TooltipProvider>
+        <ThemeProvider>
+          <TooltipProvider>{children}</TooltipProvider>
+        </ThemeProvider>
         <Toaster position="top-center" />
       </body>
     </html>

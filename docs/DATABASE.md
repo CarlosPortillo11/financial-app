@@ -1,14 +1,24 @@
 # Estructura de la base de datos
 
 PostgreSQL 17 · Drizzle ORM · fuente de verdad: `src/db/schema.ts`.
-Sincronizar con `npx drizzle-kit push`. Seed inicial: `npx tsx src/db/seed.ts`.
+Sincronizar con `npx drizzle-kit push`. Cada usuario nuevo recibe ajustes y categorías por defecto al registrarse (`src/db/new-user.ts`).
 
 ```
+user       1 ──< (todas las tablas de datos, vía user_id, cascade)
+user       1 ──1 settings
+user       1 ──< session, account   (Better Auth)
 categories 1 ──< fixed_expenses
 categories 1 ──< variable_expenses
-incomes            (sin FK)
-settings           (fila única)
+categories 1 ──1 savings_goals
+cards      1 ──< card_payments
 ```
+
+## Multiusuario
+
+Tablas de Better Auth (`user`, `session`, `account`, `verification`) en `src/db/auth-schema.ts`, generadas con `npx auth generate`.
+Todas las tablas de datos tienen `user_id text not null` → `user.id` (`on delete cascade`). Toda consulta y acción filtra por `user_id`; las acciones validan además que `category_id` y `card_id` sean del mismo usuario (`ownsRefs`).
+Los nombres únicos son por usuario: `categories (user_id, name)`, `cards (user_id, name)`; `seeded_periods` tiene PK `(user_id, period)`.
+
 
 ## Enums
 
@@ -25,7 +35,7 @@ settings           (fila única)
 | --- | --- | --- | --- |
 | `id` | serial | PK | |
 | `emoji` | varchar(16) | not null | Un emoji; 16 chars cubre ZWJ y tonos de piel |
-| `name` | varchar(60) | not null, **unique** | |
+| `name` | varchar(60) | not null, **unique por usuario** | |
 | `type` | `category_type` | not null | Eje de la regla 50/30/20 |
 | `applies_to` | `category_scope` | not null, default `ambos` | Filtra qué formulario la ofrece |
 | `active` | boolean | not null, default true | Desactivar en vez de borrar |
@@ -38,13 +48,30 @@ Borrado físico solo si no tiene movimientos: ambas FK son `ON DELETE RESTRICT`.
 | Columna | Tipo | Restricción | Notas |
 | --- | --- | --- | --- |
 | `id` | serial | PK | |
-| `name` | varchar(60) | not null, unique | |
+| `name` | varchar(60) | not null, unique por usuario | |
 | `cut_day` | smallint | not null, `1..31` | Día de corte |
 | `pay_day` | smallint | not null, `1..31` | Día límite de pago; si es ≤ `cut_day` cae en el mes siguiente |
-| `paid_statement` | varchar(7) | nullable | `YYYY-MM` del último corte marcado como pagado; sin historial |
+| `balance_from` | date | nullable | Cargos y pagos anteriores a esta fecha se consideran liquidados. Null = cuenta todo |
 | `created_at` | timestamptz | not null, default now() | |
 
-Estado de cuenta, monto por pagar y alertas se calculan en `lib/cards.ts` a partir de los movimientos con `card_id`; el pago de la tarjeta no es un gasto (los cargos ya lo son).
+Saldo: cargos hasta el corte − pagos (`card_payments`). Lo no pagado se arrastra al siguiente corte y se marca vencido. Cálculo en `lib/cards.ts`; el pago de la tarjeta no es un gasto (los cargos ya lo son).
+
+## `card_payments`
+
+| Columna | Tipo | Restricción | Notas |
+| --- | --- | --- | --- |
+| `id` | serial | PK | |
+| `card_id` | integer | FK → cards, cascade, **index** | |
+| `amount` | numeric(12,2) | not null, `> 0` | Puede ser parcial |
+| `date` | date | not null | |
+| `created_at` | timestamptz | not null, default now() | |
+
+## `seeded_periods`
+
+| Columna | Tipo | Restricción | Notas |
+| --- | --- | --- | --- |
+| `user_id` | text | PK (con `period`) | |
+| `period` | varchar(7) | PK (con `user_id`) | Mes cuyos fijos recurrentes ya se copiaron; se reclama dentro de la transacción de copia |
 
 ## `fixed_expenses`
 
@@ -62,9 +89,9 @@ Estado de cuenta, monto por pagar y alertas se calculan en `lib/cards.ts` a part
 | `active` | boolean | not null, default true | Recurrente: se copia al abrir un mes nuevo |
 | `created_at` | timestamptz | not null, default now() | |
 
-Auto-copia (`ensureFixedForPeriod` en `src/lib/queries.ts`): al consultar un mes
-≥ actual sin filas, copia las filas `active` del último `period` anterior con
-datos, en `pendiente`. Meses pasados nunca se rellenan.
+Auto-copia (`ensurePeriodSeeded` en `src/lib/queries.ts`): la primera vez que se consulta un mes
+≥ actual (lo registra en `seeded_periods`), copia las filas `active` del último `period` anterior con
+datos, en `pendiente`, sin duplicar las que ya existan (misma categoría y descripción). Meses pasados nunca se rellenan.
 
 ## `variable_expenses`
 
@@ -85,17 +112,18 @@ datos, en `pendiente`. Meses pasados nunca se rellenan.
 | `id` | serial | PK | |
 | `source` | varchar(120) | not null | Ej. "Salario quincena 1" |
 | `type` | `income_type` | not null, default `salario` | |
+| `recurring` | boolean | not null, default false | Se copia al abrir un mes nuevo, mismo día del mes |
 | `amount` | numeric(12,2) | not null, `> 0` | |
 | `date` | date | not null, **index** | Mes y quincena derivados |
 | `created_at` | timestamptz | not null, default now() | |
 
 ## `settings`
 
-Fila única (`id = 1`, CHECK). Porcentajes enteros.
+Una fila por usuario. Porcentajes enteros.
 
 | Columna | Tipo | Default | Restricción |
 | --- | --- | --- | --- |
-| `id` | smallint | 1 | PK, `= 1` |
+| `user_id` | text | | PK, FK → user |
 | `needs_pct` | smallint | 50 | |
 | `wants_pct` | smallint | 30 | |
 | `savings_pct` | smallint | 20 | `needs + wants + savings = 100` |
@@ -103,11 +131,24 @@ Fila única (`id = 1`, CHECK). Porcentajes enteros.
 | `invest_split_pct` | smallint | 10 | `saving_split + invest_split = savings_pct` |
 | `pay_day_1` | smallint | 14 | Día del primer pago; `1..31`, `< pay_day_2` |
 | `pay_day_2` | smallint | 28 | Día del segundo pago. Q1 = [`pay_day_1`, `pay_day_2`), Q2 = resto (cruza al mes siguiente) |
+| `carry_balance` | boolean | true | Suma a lo disponible el saldo de meses anteriores |
+| `time_zone` | varchar(64) | `America/Mexico_City` | Define qué día es "hoy" para quincenas y avisos |
+| `currency` | varchar(3) | `MXN` | Código ISO 4217 para formatear montos |
+
+## `savings_goals`
+
+| Columna | Tipo | Restricción | Notas |
+| --- | --- | --- | --- |
+| `id` | serial | PK | |
+| `name` | varchar(60) | not null | |
+| `category_id` | integer | FK → categories, restrict, **unique** | Categoría de ahorro cuyo gasto acumulado es el avance |
+| `target` | numeric(12,2) | not null, `> 0` | |
+| `deadline` | date | nullable | Con fecha, se sugiere cuánto apartar al mes |
+| `created_at` | timestamptz | not null, default now() | |
 
 ## Decisiones y posibles cambios futuros
 
-- **Sin tabla de usuario.** Un solo usuario. Para multiusuario: columna `user_id`
-  en las cuatro tablas de datos + `settings` pasa a una fila por usuario.
+- **Aislamiento por `user_id` en la aplicación**, no con Row Level Security de Postgres. Si algún día se expone la base a otro cliente, añadir RLS.
 - **`period` como texto `YYYY-MM`** en lugar de `date`. Evita problemas de zona
   horaria en JS y hace trivial comparar/ordenar. Si se quiere agregar por
   trimestre/año con SQL nativo, cambiar a `date` (primer día del mes).
@@ -118,6 +159,6 @@ Fila única (`id = 1`, CHECK). Porcentajes enteros.
   calculan en `src/lib/calc.ts` (función pura, testeada en `calc.test.ts`).
 - **Sin borrado lógico en movimientos**: se eliminan físicamente. Si se quiere
   papelera, añadir `deleted_at`.
-- **Sin moneda** en el esquema: formato fijo `$#,##0.00` (MXN) en `src/lib/money.ts`.
+- **Moneda por usuario** (`settings.currency`); el formato usa `Intl.NumberFormat("es-MX")` con esa moneda.
 - **Candidatos a índice si crece el histórico**: `variable_expenses(category_id)`,
   `fixed_expenses(category_id)`; hoy las consultas filtran por mes y son pequeñas.

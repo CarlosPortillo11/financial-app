@@ -1,3 +1,4 @@
+import { requireSettings } from "@/lib/session";
 import { Alerts, RuleTable, Suggestions } from "@/components/dashboard/advice";
 import { PageHeader } from "@/components/shared/page-header";
 import { formatPeriod } from "@/lib/period";
@@ -6,8 +7,9 @@ import { computeMonth } from "@/lib/calc";
 import { resolvePeriod } from "@/lib/search-params";
 
 export default async function AdvicePage({ searchParams }: PageProps<"/consejos">) {
-  const period = await resolvePeriod(searchParams);
-  const data = await getMonthData(period);
+  const settings = await requireSettings();
+  const period = await resolvePeriod(searchParams, settings);
+  const data = await getMonthData(settings, period);
   const s = computeMonth(data);
 
   return (

@@ -1,5 +1,6 @@
 import { z } from "zod";
-import { PERIOD_RE } from "@/lib/period";
+import { CURRENCY_OPTIONS, TIME_ZONE_OPTIONS } from "@/lib/labels";
+import { isRealDate, PERIOD_RE } from "@/lib/period";
 
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -10,7 +11,7 @@ export const periodSchema = z.string().regex(PERIOD_RE, "Mes inválido");
 export const dateSchema = z
   .string()
   .regex(DATE_RE, "Fecha inválida")
-  .refine((s) => !Number.isNaN(Date.parse(s)), "Fecha inválida");
+  .refine(isRealDate, "Esa fecha no existe");
 
 export const amountSchema = z
   .number({ error: "Escribe un monto" })
@@ -66,6 +67,7 @@ export const incomeSchema = z.object({
   type: z.enum(["salario", "ingreso_extra"]),
   amount: amountSchema,
   date: dateSchema,
+  recurring: z.boolean(),
 });
 export type IncomeInput = z.infer<typeof incomeSchema>;
 
@@ -80,6 +82,9 @@ export const settingsSchema = z
     investSplitPct: pctField,
     payDay1: dayField,
     payDay2: dayField,
+    carryBalance: z.boolean(),
+    timeZone: z.enum(TIME_ZONE_OPTIONS.map((o) => o.value) as [string, ...string[]]),
+    currency: z.enum(CURRENCY_OPTIONS.map((o) => o.value) as [string, ...string[]]),
   })
   .refine((s) => s.payDay1 < s.payDay2, {
     message: "El primer día de pago debe ser menor que el segundo",
@@ -104,3 +109,33 @@ export const cardSchema = z.object({
   payDay: dayField,
 });
 export type CardInput = z.infer<typeof cardSchema>;
+
+export const cardPaymentSchema = z.object({
+  cardId: idSchema,
+  amount: amountSchema,
+  date: dateSchema,
+});
+export type CardPaymentInput = z.infer<typeof cardPaymentSchema>;
+
+export const goalSchema = z.object({
+  name: z.string().trim().min(2, "Mínimo 2 caracteres").max(60, "Máximo 60 caracteres"),
+  categoryId: z.number({ error: "Elige una categoría de ahorro" }).int().positive(),
+  target: amountSchema,
+  deadline: dateSchema.or(z.literal("")),
+});
+export type GoalInput = z.infer<typeof goalSchema>;
+
+const email = z.email("Correo inválido").trim().toLowerCase();
+
+export const signInSchema = z.object({
+  email,
+  password: z.string().min(1, "Escribe tu contraseña"),
+});
+export type SignInInput = z.infer<typeof signInSchema>;
+
+export const signUpSchema = z.object({
+  name: z.string().trim().min(2, "Mínimo 2 caracteres").max(60, "Máximo 60 caracteres"),
+  email,
+  password: z.string().min(8, "Mínimo 8 caracteres").max(128, "Máximo 128 caracteres"),
+});
+export type SignUpInput = z.infer<typeof signUpSchema>;

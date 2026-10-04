@@ -38,3 +38,30 @@ export const TYPE_SHORT: Record<CategoryType, string> = {
   deseo: "Deseo",
   ahorro_inversion: "Ahorro",
 };
+
+export const CURRENCY_OPTIONS = [
+  { value: "MXN", label: "Peso mexicano (MXN)" },
+  { value: "USD", label: "Dólar estadounidense (USD)" },
+  { value: "EUR", label: "Euro (EUR)" },
+  { value: "COP", label: "Peso colombiano (COP)" },
+  { value: "ARS", label: "Peso argentino (ARS)" },
+  { value: "CLP", label: "Peso chileno (CLP)" },
+  { value: "PEN", label: "Sol peruano (PEN)" },
+  { value: "GTQ", label: "Quetzal (GTQ)" },
+];
+
+export const TIME_ZONE_OPTIONS = [
+  { value: "America/Mexico_City", label: "Ciudad de México" },
+  { value: "America/Tijuana", label: "Tijuana" },
+  { value: "America/Hermosillo", label: "Hermosillo" },
+  { value: "America/Mazatlan", label: "Mazatlán" },
+  { value: "America/Cancun", label: "Cancún" },
+  { value: "America/Guatemala", label: "Guatemala" },
+  { value: "America/Bogota", label: "Bogotá" },
+  { value: "America/Lima", label: "Lima" },
+  { value: "America/Santiago", label: "Santiago" },
+  { value: "America/Argentina/Buenos_Aires", label: "Buenos Aires" },
+  { value: "America/New_York", label: "Nueva York" },
+  { value: "America/Los_Angeles", label: "Los Ángeles" },
+  { value: "Europe/Madrid", label: "Madrid" },
+];

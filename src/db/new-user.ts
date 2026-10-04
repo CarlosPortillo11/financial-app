@@ -1,8 +1,7 @@
-import "dotenv/config";
 import { db } from "./index";
 import { categories, settings } from "./schema";
 
-const seedCategories: (typeof categories.$inferInsert)[] = [
+const DEFAULT_CATEGORIES: Omit<typeof categories.$inferInsert, "userId">[] = [
   { emoji: "🏠", name: "Vivienda", type: "necesidad", appliesTo: "fijo" },
   { emoji: "💡", name: "Servicios", type: "necesidad", appliesTo: "ambos" },
   { emoji: "🛒", name: "Alimentación", type: "necesidad", appliesTo: "ambos" },
@@ -22,10 +21,12 @@ const seedCategories: (typeof categories.$inferInsert)[] = [
   { emoji: "🛟", name: "Fondo de emergencia", type: "ahorro_inversion", appliesTo: "ambos" },
 ];
 
-async function main() {
-  await db.insert(categories).values(seedCategories).onConflictDoNothing();
-  await db.insert(settings).values({ id: 1 }).onConflictDoNothing();
-  console.log("seed ok");
-  process.exit(0);
+export async function setupNewUser(userId: string) {
+  await db.transaction(async (tx) => {
+    await tx.insert(settings).values({ userId }).onConflictDoNothing();
+    await tx
+      .insert(categories)
+      .values(DEFAULT_CATEGORIES.map((c) => ({ ...c, userId })))
+      .onConflictDoNothing();
+  });
 }
-main();

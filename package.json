@@ -2,6 +2,10 @@
   "name": "finanzas",
   "version": "0.1.0",
   "private": true,
+  "packageManager": "pnpm@12.4.1",
+  "engines": {
+    "node": ">=20.9"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -9,11 +13,11 @@
     "lint": "eslint",
     "test": "tsx --test src/**/*.test.ts",
     "db:push": "drizzle-kit push",
-    "db:seed": "tsx src/db/seed.ts",
     "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.9.1",
+    "better-auth": "^1.7.7",
     "class-variance-authority": "^0.7.1",
     "cn": "^0.3.0",
     "drizzle-orm": "^0.45.2",

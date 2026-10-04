@@ -1,41 +1,49 @@
 "use server";
 
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { db } from "@/db";
-import { cards } from "@/db/schema";
-import { actionClient } from "@/lib/safe-action";
-import { cardSchema, idSchema, periodSchema, withId } from "@/schemas";
+import { cardPayments, cards } from "@/db/schema";
+import { ownsRefs } from "@/lib/queries";
+import { authActionClient } from "@/lib/safe-action";
+import { cardPaymentSchema, cardSchema, idSchema, withId } from "@/schemas";
 
 const revalidate = () => revalidatePath("/", "layout");
 
-export const createCard = actionClient
+export const createCard = authActionClient
   .inputSchema(cardSchema)
-  .action(async ({ parsedInput }) => {
-    await db.insert(cards).values(parsedInput);
+  .action(async ({ parsedInput, ctx: { userId } }) => {
+    await db.insert(cards).values({ ...parsedInput, userId });
     revalidate();
   });
 
-export const updateCard = actionClient
+export const updateCard = authActionClient
   .inputSchema(withId(cardSchema))
-  .action(async ({ parsedInput: { id, ...data } }) => {
-    await db.update(cards).set(data).where(eq(cards.id, id));
+  .action(async ({ parsedInput: { id, ...data }, ctx: { userId } }) => {
+    await db.update(cards).set(data).where(and(eq(cards.id, id), eq(cards.userId, userId)));
     revalidate();
   });
 
-/** Marca (o desmarca con null) el corte indicado como pagado. */
-export const setCardPaid = actionClient
-  .inputSchema(z.object({ id: idSchema, statement: periodSchema.nullable() }))
-  .action(async ({ parsedInput: { id, statement } }) => {
-    await db.update(cards).set({ paidStatement: statement }).where(eq(cards.id, id));
+export const payCard = authActionClient
+  .inputSchema(cardPaymentSchema)
+  .action(async ({ parsedInput, ctx: { userId } }) => {
+    await ownsRefs(userId, { cardId: parsedInput.cardId });
+    await db.insert(cardPayments).values({ ...parsedInput, userId });
+    revalidate();
+  });
+
+export const deleteCardPayment = authActionClient
+  .inputSchema(z.object({ id: idSchema }))
+  .action(async ({ parsedInput: { id }, ctx: { userId } }) => {
+    await db.delete(cardPayments).where(and(eq(cardPayments.id, id), eq(cardPayments.userId, userId)));
     revalidate();
   });
 
 // Los movimientos quedan sin tarjeta (FK set null).
-export const deleteCard = actionClient
+export const deleteCard = authActionClient
   .inputSchema(z.object({ id: idSchema }))
-  .action(async ({ parsedInput: { id } }) => {
-    await db.delete(cards).where(eq(cards.id, id));
+  .action(async ({ parsedInput: { id }, ctx: { userId } }) => {
+    await db.delete(cards).where(and(eq(cards.id, id), eq(cards.userId, userId)));
     revalidate();
   });

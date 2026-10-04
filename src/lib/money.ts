@@ -1,12 +1,11 @@
-const fmt = new Intl.NumberFormat("es-MX", {
-  style: "currency",
-  currency: "MXN",
-  minimumFractionDigits: 2,
-  maximumFractionDigits: 2,
-});
+const formatters = new Map<string, Intl.NumberFormat>();
 
-/** $#,##0.00 — mismo formato que el Excel. */
-export function money(n: number): string {
+export function money(n: number, currency: string): string {
+  let fmt = formatters.get(currency);
+  if (!fmt) {
+    fmt = new Intl.NumberFormat("es-MX", { style: "currency", currency });
+    formatters.set(currency, fmt);
+  }
   return fmt.format(n);
 }
 
