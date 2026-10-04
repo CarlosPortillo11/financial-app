@@ -3,7 +3,7 @@ const formatters = new Map<string, Intl.NumberFormat>();
 export function money(n: number, currency: string): string {
   let fmt = formatters.get(currency);
   if (!fmt) {
-    fmt = new Intl.NumberFormat("es-MX", { style: "currency", currency });
+    fmt = new Intl.NumberFormat("es-MX", { style: "currency", currency, currencyDisplay: "narrowSymbol" });
     formatters.set(currency, fmt);
   }
   return fmt.format(n);

@@ -44,6 +44,7 @@ export const CURRENCY_OPTIONS = [
   { value: "USD", label: "Dólar estadounidense (USD)" },
   { value: "EUR", label: "Euro (EUR)" },
   { value: "COP", label: "Peso colombiano (COP)" },
+  { value: "CRC", label: "Colón costarricense (CRC)" },
   { value: "ARS", label: "Peso argentino (ARS)" },
   { value: "CLP", label: "Peso chileno (CLP)" },
   { value: "PEN", label: "Sol peruano (PEN)" },
