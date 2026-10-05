@@ -185,10 +185,6 @@
 }
 /* Scroll edge effect: la barra se desvanece donde la encuentra el contenido,
    en vez de chocar con él. */
-.glass-bar,
-.glass-bar-bottom {
-  position: relative;
-}
 /* El material va en un pseudo por detrás: si la máscara se aplicara al propio
    elemento también desvanecería su contenido. Ambas barras crean contexto de
    apilamiento (sticky/fixed + z-index), así que el -1 queda contenido. */

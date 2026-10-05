@@ -13,6 +13,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { authClient } from "@/lib/auth-client";
+import { NAV } from "@/lib/nav";
 import { cn } from "@/lib/utils";
 
 export type SessionUser = { name: string; email: string };
@@ -44,6 +45,17 @@ export function UserMenu({ user, className }: { user: SessionUser; className?: s
           <span className="truncate text-xs font-normal text-muted-foreground">{user.email}</span>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
+        <DropdownMenuGroup className="md:hidden">
+          {NAV.slice(5, 8).map((item) => (
+            <DropdownMenuItem key={item.href} asChild>
+              <Link href={item.href}>
+                <item.icon />
+                {item.label}
+              </Link>
+            </DropdownMenuItem>
+          ))}
+          <DropdownMenuSeparator />
+        </DropdownMenuGroup>
         <DropdownMenuGroup>
           <DropdownMenuItem asChild>
             <Link href="/ajustes">

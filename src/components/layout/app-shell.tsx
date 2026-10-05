@@ -1,7 +1,7 @@
 import { Suspense, ViewTransition } from "react";
 import type { Card, Category } from "@/db/schema";
 import type { Schedule } from "@/lib/period";
-import { IconLinks, SidebarNav, TabBar } from "./nav";
+import { SidebarNav, TabBar } from "./nav";
 import { MonthPicker } from "./month-picker";
 import { QuickAdd } from "./quick-add";
 import { UserMenu, type SessionUser } from "./user-menu";
@@ -38,12 +38,7 @@ export function AppShell({
           <Suspense>
             <MonthPicker payDays={payDays} />
           </Suspense>
-          <div className="flex items-center gap-2 md:hidden">
-            <Suspense>
-              <IconLinks />
-            </Suspense>
-            <UserMenu user={user} className="size-11 shrink-0" />
-          </div>
+          <UserMenu user={user} className="ml-auto size-11 shrink-0 md:hidden" />
         </header>
         <main className="flex-1 px-4 pb-28 md:px-8 md:pb-10">
           <ViewTransition enter="genie" exit="genie" default="none">

@@ -91,23 +91,3 @@ export function TabBar() {
     </nav>
   );
 }
-
-export function IconLinks() {
-  const href = useHref();
-  return (
-    <div className="flex items-center gap-2">
-      {NAV.slice(5)
-        .filter((item) => item.href !== "/ajustes")
-        .map((item) => (
-          <Link
-            key={item.href}
-            href={href(item.href)}
-            aria-label={item.label}
-            className="flex size-11 items-center justify-center rounded-[0.875rem] bg-white/45 text-muted-foreground hover:text-foreground dark:bg-white/8"
-          >
-            <item.icon className="size-5" strokeWidth={1.5} />
-          </Link>
-        ))}
-    </div>
-  );
-}

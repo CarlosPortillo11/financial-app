@@ -40,9 +40,12 @@ export function MonthPicker({ payDays }: { payDays: Schedule }) {
         type="button"
         onClick={() => !isCurrent && go(current)}
         title={isCurrent ? undefined : "Ir al mes actual"}
-        className="min-w-36 rounded-lg px-2 py-1 text-center hover:bg-accent/60"
+        className="rounded-lg px-2 py-1 text-center whitespace-nowrap hover:bg-accent/60 md:min-w-36"
       >
-        <span className="block text-sm font-medium tracking-tight">{formatPeriod(period)}</span>
+        <span className="block text-sm font-medium tracking-tight">
+          <span className="md:hidden">{formatPeriod(period, "short")}</span>
+          <span className="max-md:hidden">{formatPeriod(period)}</span>
+        </span>
         <span className="block text-[0.6875rem] leading-tight text-muted-foreground">
           {formatPeriodRange(period, payDays)}
         </span>

@@ -65,9 +65,9 @@ export function biweekLabel(n: Biweek, p: PayDays): string {
   return `del ${p.payDay2} al ${p.payDay1 === 1 ? "fin de mes" : p.payDay1 - 1}`;
 }
 
-export function formatPeriod(period: string): string {
+export function formatPeriod(period: string, month: "long" | "short" = "long"): string {
   const [y, m] = period.split("-").map(Number);
-  return new Intl.DateTimeFormat("es-MX", { month: "long", year: "numeric" })
+  return new Intl.DateTimeFormat("es-MX", { month, year: "numeric" })
     .format(new Date(y, m - 1, 1))
     .replace(/^./, (c) => c.toUpperCase());
 }
