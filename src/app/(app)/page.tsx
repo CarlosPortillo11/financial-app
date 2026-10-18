@@ -1,3 +1,6 @@
+import { SparklesIcon } from "lucide-react";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 import { CategoryTable } from "@/components/dashboard/category-table";
 import { HeroAvailable } from "@/components/dashboard/hero-available";
 import { DashboardBento } from "@/components/dashboard/kpi-cards";
@@ -19,6 +22,12 @@ export default async function DashboardPage({ searchParams }: PageProps<"/">) {
     <div className="flex flex-col gap-7 md:gap-9">
       <h1 className="sr-only">Resumen de {formatPeriod(period)}</h1>
       <HeroAvailable totals={s.totals} daily={daily} />
+      <Button asChild variant="outline" size="lg" className="rise self-start">
+        <Link href={`/tu-mes?m=${period}`}>
+          <SparklesIcon data-icon="inline-start" />
+          Ver {formatPeriod(period, "short")} en historia
+        </Link>
+      </Button>
       <DashboardBento totals={s.totals} biweeks={s.byBiweek} />
       <RuleChart byType={s.byType} />
       <CategoryTable rows={s.byCategory} />

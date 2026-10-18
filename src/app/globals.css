@@ -12,6 +12,12 @@
   --color-success: var(--success);
   --color-warning: var(--warning);
   --color-need: var(--chart-1);
+  --color-story-ink: var(--story-ink);
+  --color-story-green: var(--story-green);
+  --color-story-coral: var(--story-coral);
+  --color-story-amber: var(--story-amber);
+  --color-story-indigo: var(--story-indigo);
+  --color-story-cream: var(--story-cream);
   --color-want: var(--chart-2);
   --color-save: var(--chart-3);
   --color-sidebar-ring: var(--sidebar-ring);
@@ -60,6 +66,12 @@
   --glass-c: oklch(0.901 0.006 31);
   --grain-opacity: 0.3;
   color-scheme: light;
+  --story-ink: oklch(0.17 0.006 40);
+  --story-green: oklch(0.45 0.12 165);
+  --story-coral: oklch(0.56 0.19 27);
+  --story-amber: oklch(0.84 0.14 82);
+  --story-indigo: oklch(0.42 0.17 275);
+  --story-cream: oklch(0.94 0.012 70);
 
   /* Las superficies son blanco translúcido sobre el cristal, no colores opacos. */
   --background: oklch(0.912 0.005 20);
@@ -507,5 +519,20 @@
   .grow-x,
   [data-slot="progress-indicator"] {
     animation: none;
+  }
+}
+
+.story-blob {
+  position: absolute;
+  inline-size: 80vmax;
+  block-size: 80vmax;
+  border-radius: 50%;
+  pointer-events: none;
+  opacity: 0.55;
+  background: radial-gradient(circle, color-mix(in oklch, var(--blob) 70%, transparent), transparent 62%);
+}
+@media (prefers-reduced-motion: no-preference) {
+  [data-story] [data-anim] {
+    visibility: hidden;
   }
 }

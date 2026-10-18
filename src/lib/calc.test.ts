@@ -1,6 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { computeMonth, dailyAllowance, type MonthData } from "./calc";
+import { buildStory } from "./story";
 import {
   biweekLabel,
   biweekOf,
@@ -159,4 +160,15 @@ test("fechas de pago y desplazamiento de meses", () => {
   assert.equal(shiftDate("2026-01-31", 1), "2026-02-28");
   assert.equal(shiftDate("2026-11-15", 2), "2027-01-15");
   assert.equal(monthsBetween("2026-11", "2027-02"), 3);
+});
+
+test("historia del mes", () => {
+  const story = buildStory("2026-09", data, computeMonth(data));
+  assert.equal(story.spentRatio, 0.75);
+  assert.equal(story.moves, 5);
+  assert.deepEqual(story.top, { emoji: "x", name: "c1", total: 4500, ratio: 0.6 });
+  assert.equal(story.biggest?.amount, 1800);
+  assert.equal(story.biggest?.label, "c2");
+  assert.equal(story.calmest, 2);
+  assert.equal(story.savedRatio, 0.1);
 });
