@@ -31,7 +31,7 @@ export function CategoryTable({ rows }: { rows: CategorySummary[] }) {
       ) : (
         <>
           <ul className="flex flex-col divide-y divide-border/60 md:hidden">
-            {rows.map((r) => (
+            {rows.map((r, i) => (
               <li key={r.category.id} className="flex flex-col gap-1.5 px-4 py-2.5">
                 <div className="flex items-center justify-between gap-3">
                   <CategoryLabel category={r.category} className="min-w-0 font-medium" />
@@ -41,12 +41,13 @@ export function CategoryTable({ rows }: { rows: CategorySummary[] }) {
                   <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-muted">
                     <div
                       className={cn(
-                        "h-full rounded-full",
+                        "grow-x h-full rounded-full",
                         r.high ? "bg-destructive" : TYPE_COLOR[r.category.type],
                       )}
                       style={{
                         width: `${Math.min(100, r.pctOfSpent * 100)}%`,
-                      }}
+                        "--i": i,
+                      } as React.CSSProperties}
                     />
                   </div>
                   <span className="tnum">{pct(r.pctOfSpent, 0)} del gasto</span>

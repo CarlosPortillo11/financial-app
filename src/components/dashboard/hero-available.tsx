@@ -13,11 +13,12 @@ export function HeroAvailable({ totals, daily }: { totals: Totals; daily: DailyA
   const negative = available < 0;
 
   return (
-    <div className="flex flex-col gap-6">
+    <div data-hero className="flex flex-col gap-6">
       <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
-        <div className="flex flex-col gap-1">
+        <div className="rise flex flex-col gap-1">
           <span className="text-sm text-muted-foreground">Disponible este mes</span>
           <Amount
+            animate
             value={available}
             className={cn("text-4xl tracking-tight md:text-5xl", negative && "text-destructive")}
           />
@@ -36,10 +37,10 @@ export function HeroAvailable({ totals, daily }: { totals: Totals; daily: DailyA
         {daily && <DailyTile daily={daily} />}
       </div>
 
-      <div className="flex flex-col gap-3">
+      <div className="rise flex flex-col gap-3" style={{ "--i": 1 } as React.CSSProperties}>
         <div className="flex h-2 w-full overflow-hidden rounded-full bg-foreground/10">
-          <div className="bg-primary" style={{ width: seg(fixed) }} title="Gasto fijo" />
-          <div className="bg-want" style={{ width: seg(variable) }} title="Gasto variable" />
+          <div className="grow-x bg-primary" style={{ width: seg(fixed) }} title="Gasto fijo" />
+          <div className="grow-x bg-want" style={{ width: seg(variable), "--i": 1 } as React.CSSProperties} title="Gasto variable" />
         </div>
         <dl className="grid grid-cols-3 gap-2 text-sm">
           <Legend color="bg-primary" label="Fijo" value={fixed} />
@@ -68,9 +69,9 @@ function Legend({ color, label, value }: { color: string; label: string; value: 
 function DailyTile({ daily }: { daily: DailyAllowance }) {
   const empty = daily.amount === 0;
   return (
-    <div className="tile flex flex-col gap-1 rounded-2xl px-5 py-4 md:min-w-64">
+    <div className="tile rise flex flex-col gap-1 rounded-2xl px-5 py-4 md:min-w-64">
       <span className="text-sm text-muted-foreground">Hoy puedes gastar</span>
-      <Amount value={daily.amount} className={cn("text-3xl tracking-tight", empty && "text-destructive")} />
+      <Amount animate value={daily.amount} className={cn("text-3xl tracking-tight", empty && "text-destructive")} />
       <span className="text-xs text-muted-foreground">
         {empty
           ? `No queda margen hasta tu pago del ${formatDate(daily.until)}`

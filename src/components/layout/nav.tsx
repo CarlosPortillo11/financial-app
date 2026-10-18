@@ -77,11 +77,18 @@ export function TabBar() {
                 href={href(item.href)}
                 aria-current={active ? "page" : undefined}
                 className={cn(
-                  "flex flex-col items-center gap-1 py-2.5 text-[11px] text-muted-foreground",
+                  "flex flex-col items-center gap-0.5 py-2 text-[11px] text-muted-foreground transition-colors",
                   active && "text-foreground",
                 )}
               >
-                <item.icon className="size-5" strokeWidth={active ? 2 : 1.5} />
+                <span className="relative flex h-7 w-12 items-center justify-center">
+                  {active && (
+                    <ViewTransition name="tab-active">
+                      <span aria-hidden className="absolute inset-0 rounded-full bg-foreground/8" />
+                    </ViewTransition>
+                  )}
+                  <item.icon className="relative size-5" strokeWidth={active ? 2 : 1.5} />
+                </span>
                 {item.label}
               </Link>
             </li>

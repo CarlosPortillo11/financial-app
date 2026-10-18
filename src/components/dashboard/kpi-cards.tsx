@@ -20,7 +20,7 @@ export function DashboardBento({ totals, biweeks }: { totals: Totals; biweeks: B
             <k.icon className="size-4.5" strokeWidth={1.5} />
           </span>
           <span className="mt-3 flex flex-col gap-0.5">
-            <Amount value={k.value} className="text-2xl tracking-tight" />
+            <Amount animate value={k.value} className="text-2xl tracking-tight" />
             <span className="text-sm text-muted-foreground">{k.label}</span>
           </span>
         </BentoTile>

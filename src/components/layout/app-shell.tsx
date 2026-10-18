@@ -3,6 +3,7 @@ import type { Card, Category } from "@/db/schema";
 import type { Schedule } from "@/lib/period";
 import { SidebarNav, TabBar } from "./nav";
 import { MonthPicker } from "./month-picker";
+import { MotionRoot } from "./motion-root";
 import { QuickAdd } from "./quick-add";
 import { UserMenu, type SessionUser } from "./user-menu";
 
@@ -42,7 +43,7 @@ export function AppShell({
         </header>
         <main className="flex-1 px-4 pb-28 md:px-8 md:pb-10">
           <ViewTransition enter="genie" exit="genie" default="none">
-            <div className="mx-auto w-full max-w-6xl">{children}</div>
+            <MotionRoot>{children}</MotionRoot>
           </ViewTransition>
         </main>
       </div>
