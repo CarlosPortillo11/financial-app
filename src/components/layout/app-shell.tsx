@@ -4,6 +4,7 @@ import type { Schedule } from "@/lib/period";
 import { SidebarNav, TabBar } from "./nav";
 import { MonthPicker } from "./month-picker";
 import { MotionRoot } from "./motion-root";
+import { Tour } from "@/components/onboarding/tour";
 import { QuickAdd } from "./quick-add";
 import { UserMenu, type SessionUser } from "./user-menu";
 
@@ -49,6 +50,7 @@ export function AppShell({
       </div>
 
       <QuickAdd categories={categories} cards={cards} />
+      <Tour />
       <Suspense>
         <TabBar />
       </Suspense>

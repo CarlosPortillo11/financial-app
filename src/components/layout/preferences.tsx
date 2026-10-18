@@ -9,7 +9,11 @@ export function PreferencesProvider({ currency, children }: { currency: string; 
   return <CurrencyContext value={currency}>{children}</CurrencyContext>;
 }
 
+export function useCurrency() {
+  return use(CurrencyContext);
+}
+
 export function useMoney() {
-  const currency = use(CurrencyContext);
+  const currency = useCurrency();
   return (n: number) => money(n, currency);
 }

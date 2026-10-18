@@ -1,6 +1,7 @@
 "use client";
 
-import { LogOutIcon, Settings2Icon } from "lucide-react";
+import { CompassIcon, LogOutIcon, Settings2Icon } from "lucide-react";
+import { openTour } from "@/components/onboarding/tour";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -62,6 +63,10 @@ export function UserMenu({ user, className }: { user: SessionUser; className?: s
               <Settings2Icon />
               Ajustes
             </Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem onSelect={openTour}>
+            <CompassIcon />
+            Ver recorrido
           </DropdownMenuItem>
           <DropdownMenuItem onSelect={signOut}>
             <LogOutIcon />
